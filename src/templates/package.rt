@@ -1,0 +1,14 @@
+div{class=block-container}:
+ div{class=table__name header-block}:"Package Information";
+ div{class=block};
+  div{class=header__inner_block color-block}:%packageName%
+  div{class=block-inner}:
+   h2:%packageMainDescription%;
+   p:%packageDescription%;
+  div{class=header__inner_block color-block}:"Dependencies"
+  div{class=block-inner}:
+   var:%dependencies%;
+  div{class=header__inner_block color-block}:"Reverse Dependencies"
+  div{class=block-inner}:
+   var:%reverseDependencies%;
+

@@ -1,0 +1,17 @@
+html{lang="en"}:
+ head:
+  title:"Status file viewer";
+  meta{charset="utf-8"}:;
+  link{rel="stylesheet",href="css/style.css"}:;
+ body:
+  header:
+   h1{class="header__main"}:"ステータスファイルビューア";
+  main{class="root"}:;
+   div1{class="sidebar",id="sidebar-left"}:
+    p1:"Hello";
+   div2{class="main"}:
+    p2:"Test";
+   div3{class="sidebar",id="sidebar-right"}:
+    p3:"Once more";
+  footer{class="footer"}:;
+   p:"2019 - Aku Mäkelä";

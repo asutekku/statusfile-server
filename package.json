@@ -1,0 +1,14 @@
+{
+  "name": "statusfile-server",
+  "version": "1.0.0",
+  "description": "Server-side Status File Viewer",
+  "main": "index.js",
+  "author": "Aku Mäkelä",
+  "license": "MIT",
+  "dependencies": {
+    "http": "^0.0.0"
+  },
+  "devDependencies": {
+    "@types/node": "^13.1.5"
+  }
+}
