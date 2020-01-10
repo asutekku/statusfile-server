@@ -1,8 +1,8 @@
 import * as fs from "fs";
-import {rElement} from "./rElements";
+import {OmiElement} from "./rElements";
 
-export class rTemplate {
-    private structure!: rElement;
+export class OmiTemplate {
+    private structure!: OmiElement;
 
     constructor(filepath: string) {
         let content: string = "";
@@ -22,9 +22,9 @@ export class rTemplate {
      * Creates an object of the template file
      * @param content The document to be parsed
      */
-    parse(content: string[]): rElement {
-        let nodes: rElement[] = content.map((line: string) => new rElement(line));
-        let root: rElement = nodes.shift()!;
+    parse(content: string[]): OmiElement {
+        let nodes: OmiElement[] = content.map((line: string) => new OmiElement(line));
+        let root: OmiElement = nodes.shift()!;
         root.addChildren(nodes);
         return root;
     };
@@ -33,6 +33,23 @@ export class rTemplate {
         return this.structure.toHTML();
     }
 
+}
+
+export class Omi {
+    public static compile(filepath: string): (values: { [key: string]: string; }) => string {
+        let template: OmiTemplate = new OmiTemplate(filepath);
+        return (values: { [key: string]: string; }) => {
+            let temp = template.toHTML();
+            Object.keys(values).forEach(function (key: string) {
+                temp = temp.replace(`%${key}%`, values[key]);
+            });
+            return temp;
+        };
+    }
+
+    public static getTemplate(filepath: string): OmiTemplate {
+        return new OmiTemplate(filepath);
+    }
 }
 
 /**

@@ -1,9 +1,9 @@
-export class rElement {
+export class OmiElement {
     private readonly params?: string[][];
     private readonly type: string = "div"; // If type is not explicitly defined, use div.
     private readonly value?: string;
     private readonly depth: number;
-    private children: rElement[] = [];
+    private children: OmiElement[] = [];
     static globalID = 0;
     private id: number;
 
@@ -22,14 +22,18 @@ export class rElement {
         if (str.match(this.textRegEx)) this.value = str.match(this.textRegEx)![1].trim();
         this.depth = str.match(this.depthRegEx)![0].length;
 
-        this.id = rElement.globalID;
-        rElement.globalID++;
+        this.id = OmiElement.globalID;
+        OmiElement.globalID++;
     }
 
-    addChildren(elements: rElement[]): void {
+    /**
+     * This function iterates through an array of OmiElements and creates a tree structure.
+     * @param elements
+     */
+    addChildren(elements: OmiElement[]): void {
         let childLevel: number = elements[0].depth;
         while (elements.length !== 0) {
-            let el: rElement = elements.shift()!;
+            let el: OmiElement = elements.shift()!;
             if (el.depth == childLevel) {
                 this.children.push(el);
             } else if (el.depth > childLevel) {
@@ -47,10 +51,10 @@ export class rElement {
     }
 
     /**
-     * Returns the element and all of it's children as an HTML string
+     * Returns the element and all of its children as an HTML string
      */
     toString(): string {
-        let children = this.children && this.children.length !== 0 ? this.children.map((c: rElement) => c.toString()).join("") : '',
+        let children = this.children && this.children.length !== 0 ? this.children.map((c: OmiElement) => c.toString()).join("") : '',
             inner = this.value || '',
             params = this.params ? this.params.map((p: string[]) => ` ${p[0]}="${p[1].split('"').join("")}"`).join("") : '';
         return inner || children ? `<${this.type}${params}>${inner}${children}</${this.type}>` : `<${this.type}${params}/>`;
