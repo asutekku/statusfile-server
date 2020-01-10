@@ -36,13 +36,15 @@ export class OmiTemplate {
 }
 
 export class Omi {
-    public static compile(filepath: string): (values: { [key: string]: string; }) => string {
+    public static compile(filepath: string): (values?: { [key: string]: string; }) => string {
         let template: OmiTemplate = new OmiTemplate(filepath);
-        return (values: { [key: string]: string; }) => {
+        return (values?: { [key: string]: string; }) => {
             let temp = template.toHTML();
-            Object.keys(values).forEach(function (key: string) {
-                temp = temp.replace(`%${key}%`, values[key]);
-            });
+            if (values) {
+                Object.keys(values).forEach(function (key: string) {
+                    temp = temp.replace(`%${key}%`, values[key]);
+                });
+            }
             return temp;
         };
     }

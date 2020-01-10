@@ -1,17 +1,10 @@
-html{lang="en"}:
- head:
-  title:"Status file viewer";
-  meta{charset="utf-8"}:;
-  link{rel="stylesheet",href="css/style.css"}:;
- body:
-  header:
-   h1{class="header__main"}:"ステータスファイルビューア";
-  main{class="root"}:;
-   div{class="sidebar",id="sidebar-left"}:
-    p:"%packageDescription%";
-   div{class="main"}:
-    p:"%packageName%";
-   div{class="sidebar",id="sidebar-right"}:
-    p:"Once more";
-  footer{class="footer"}:;
-   p:"2019 - Aku Mäkelä";
+div:
+ div{class="table-container"}
+  div{class="table__name header__block"}:"Packages";
+  div{class="block fit"}:
+   table{class="table"}:
+    thead{class="table__header"}:
+     tr{class="table__row"}:"%tableHeaders%";
+ div{class="button-container"}:
+  label{class="button__btn"}: "Load File"
+   input{class="button__input",type="file",accept=".txt",style="display:none;"};

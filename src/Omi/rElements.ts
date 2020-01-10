@@ -8,7 +8,7 @@ export class OmiElement {
     private id: number;
 
     private paramsRegEx: RegExp = /\{(.*)\}/;
-    private typeRegEx: RegExp = /([A-Za-z0-9]*).*:/;
+    private typeRegEx: RegExp = /([A-Za-z0-9]*).*:|;/;
     private textRegEx: RegExp = /:.*"(.*?)"/;
     private variableRegEx: RegExp = /%(.*?)%/;
     private depthRegEx: RegExp = /^\s{0,100}/;

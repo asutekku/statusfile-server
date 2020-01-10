@@ -1,7 +1,7 @@
 div{class=block-container}:
  div{class=table__name header-block}:"Package Information";
- div{class=block};
-  div{class=header__inner_block color-block}:%packageName%
+ div{class=block}:
+  div{class=header__inner_block color-block}:%packageName%;
   div{class=block-inner}:
    h2:%packageMainDescription%;
    p:%packageDescription%;
