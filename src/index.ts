@@ -3,6 +3,7 @@ import {Server} from "net";
 import {Controller} from "./Controllers/Controller";
 import {IncomingMessage, ServerResponse} from "http";
 import {Omi, OmiTemplate} from "./Omi";
+import * as fs from "fs";
 
 export class ReaktorServer {
     app: Server;
@@ -11,17 +12,22 @@ export class ReaktorServer {
 
     constructor(controllers?: Controller[]) {
         this.port = 8080;
-        this.templateFunction = Omi.compile("src/templates/main.omi");
+        this.templateFunction = Omi.compile("src/templates/index.omi");
+        let contentFunction = Omi.compile("src/templates/main.omi");
+        let sidebarFunction = Omi.compile("src/templates/package.omi");
         let msg: string = this.templateFunction(
             {
-                packageDescription: "This is the package description",
-                packageName: "This is the package name"
+                sideBarLeft: "This is the left sidebar",
+                main: contentFunction({tableHeaders: "<th>Header</th>",loadFile:"console.log('hello')"}),
+                sideBarRight: sidebarFunction(),
             }
         );
-        console.log(msg);
         this.app = http.createServer((req: IncomingMessage, res: ServerResponse) => {
             res.writeHead(200, {'Content-Type': 'text/html'});
             console.log(`Request received from: ${req.url}`);
+            if (req.url == "/css/style.css") {
+                res.write(fs.readFileSync(__dirname + req.url, 'utf8'));
+            }
             res.write(msg);
             res.end();
         });
