@@ -6,7 +6,8 @@
   "author": "Aku Mäkelä",
   "license": "MIT",
   "dependencies": {
-    "http": "^0.0.0"
+    "http": "^0.0.0",
+    "typescript": "^3.7.4"
   },
   "devDependencies": {
     "@types/node": "^13.1.5"

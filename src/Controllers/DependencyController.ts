@@ -7,8 +7,8 @@ export class DependencyController implements Controller {
     listener: any;
     type: string = "request";
 
-    constructor() {
-        this.path = '/dependency/';
+    constructor(path:string) {
+        this.path = path;
         this.listener = (req: IncomingMessage, res: ServerResponse) => {
             try {
                 res.writeHead(200, {'Content-Type': 'text/json'});

@@ -4,10 +4,10 @@ export class OmiElement {
     private readonly value?: string;
     private readonly depth: number;
     private children: OmiElement[] = [];
-    static globalID = 0;
+    static globalID: number = 0;
     private id: number;
 
-    private paramsRegEx: RegExp = /\{(.*)\}/;
+    private paramsRegEx: RegExp = /{(.*)}/;
     private typeRegEx: RegExp = /([A-Za-z0-9]*).*:|;/;
     private textRegEx: RegExp = /:.*"(.*?)"/;
     private variableRegEx: RegExp = /%(.*?)%/;

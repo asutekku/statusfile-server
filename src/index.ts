@@ -2,7 +2,7 @@ import * as http from "http";
 import {Server} from "net";
 import {Controller} from "./Controllers/Controller";
 import {IncomingMessage, ServerResponse} from "http";
-import {Omi, OmiTemplate} from "./Omi";
+import {Omi} from "./Omi";
 import * as fs from "fs";
 
 export class ReaktorServer {
@@ -18,8 +18,8 @@ export class ReaktorServer {
         let msg: string = this.templateFunction(
             {
                 sideBarLeft: "This is the left sidebar",
-                main: contentFunction({tableHeaders: "<th>Header</th>",loadFile:"console.log('hello')"}),
-                sideBarRight: sidebarFunction(),
+                main: contentFunction({tableHeaders: "<th>Header</th>"}),
+                sideBarRight: sidebarFunction({packageName: "Package"}),
             }
         );
         this.app = http.createServer((req: IncomingMessage, res: ServerResponse) => {
