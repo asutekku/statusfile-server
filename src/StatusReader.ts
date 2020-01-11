@@ -1,5 +1,19 @@
 import {Dependency, StatusPackage} from "./package";
 
+/**
+ * Enumerator including the fields included in the status file
+ * This is handled as an object in Javascript
+ */
+export enum Keys {
+    package = "Package",
+    description = "Description",
+    section = "Section",
+    maintainer = "Maintainer",
+    architecture = "Architecture",
+    source = "Source",
+    version = "Version",
+    depends = "Depends"
+}
 
 /**
  * The class handling the processing of the file and creating  the collection of packages
@@ -7,54 +21,82 @@ import {Dependency, StatusPackage} from "./package";
 export class StatusReader {
 
     /**
+     * Parses the string given with values and returns an object containing findings
+     * @param stringArr String to be parsed
+     * @param keys The keys that the function iterates over
+     * @param callback The function to parse the text with. Must have two parameters, text to be parsed and string to find
+     */
+    static getValues(stringArr: string, keys: Record<string, string>, callback: (arr: string, key: string) => string | undefined): Record<string, string> {
+
+        // Define the values to be an object of any king, as long as it has only string values in values
+        let values: Record<string, string> = {};
+
+        // Don't check keys directly as some of the values might be missing
+        Object.keys(keys).forEach((k: string) => {
+
+            // Use the getValue function to return the value of the queried value
+            // We can use custom functions to parse the text.
+            let value: string | undefined = callback(stringArr, `${keys[k]}`);
+
+            // Assign the value only if it is defined
+            if (value !== undefined) values[k] = value;
+        });
+        //console.log(values);
+        return values;
+    }
+
+    /**
      * This processes the file and produces an array of StatusPackage s
      * @param file
      */
-    static processFile(file: string): StatusPackage[] {
-        // Splits the packages
-        let statusData: string[] = file.split("\r\n\r\n");
+    public static processFile(file: string): StatusPackage[] {
 
-        let map = statusData.map((pkg: string) => {
-            if (pkg.length < 1) return; // Checks that no invalid packages are handled
-            let name = StatusReader.getValue(pkg, "Package: ")!;
-            let statusPkg = new StatusPackage(name);
-            statusPkg.status = StatusReader.getValue(pkg, "Status: ")!;
+        // Splits the list of packages
+        const statusData: string[] = file.split("\r\n\r\n");
+
+        let packages: StatusPackage[] = statusData.map((pkg: string) => {
+
+            // Return an object of values to be iterated through
+            let values: Record<string, string> = StatusReader.getValues(pkg, Keys, StatusReader.getValue);
+
+            let statusPkg = new StatusPackage(values);
+
+            // Get the description in two parts. First one is the "title" of the package, second one is the complete description
+            statusPkg.descriptionHeader = values.description ? values.description : "";
             statusPkg.description = this.getDescription(pkg);
-            statusPkg.descriptionHeader = StatusReader.getValue(pkg, "Description: ");
-            statusPkg.priority = StatusReader.getValue(pkg, "Priority: ")!;
-            statusPkg.section = StatusReader.getValue(pkg, "Section: ")!;
-            statusPkg.installSize = StatusReader.getValue(pkg, "Installed-Size: ")!;
-            statusPkg.maintainer = StatusReader.getValue(pkg, "Maintainer: ")!;
-            statusPkg.architecture = StatusReader.getValue(pkg, "Architecture: ")!;
-            statusPkg.source = StatusReader.getValue(pkg, "Source: ")!;
-            statusPkg.version = StatusReader.getValue(pkg, "Version: ")!;
-            statusPkg.replaces = StatusReader.getValue(pkg, "Replaces: ")!;
-            statusPkg.breaks = StatusReader.getValue(pkg, "Breaks: ")!;
-            statusPkg.enhances = StatusReader.getValue(pkg, "Enhances: ")!;
-            statusPkg.originalMaintainer = StatusReader.getValue(pkg, "Original-Maintainer: ");
-            let dep = StatusReader.getValue(pkg, "Depends: ");
-            statusPkg.dependenciesFromSArray(dep ? dep.split(", ") : undefined);
+
+            let dep = StatusReader.getValue(pkg, "Depends");
+            statusPkg.dependenciesFromSArray(values.depends ? values.depends.split(", ") : []);
             return statusPkg;
-        }).filter(v => v && v.name);
+        }).filter(v => v && v.package);
+
+
         /**
          * Gets the reverse dependencies. This is best done afterwards for the clarity of the code.
          */
-        map = map.map((pkg: StatusPackage) => {
-            let newMap = pkg;
-            let reverseDeps: any = map.filter((pkgInner: StatusPackage) => {
-                return pkgInner.dependencies && pkgInner.dependencies.find(d => d.name == pkg.name);
-            });
-            reverseDeps = reverseDeps.length != 0 ? reverseDeps.map((p: any) => new Dependency(p.name)) : [];
-            reverseDeps.sort();
-            newMap.requiredBy = reverseDeps;
-            return newMap
+        packages = packages.map((pkg: StatusPackage) => {
+
+            // Return packages that depend on current package
+            let dependencyPackages: Dependency[] = packages.filter((pkgInner: StatusPackage) => {
+                return pkgInner.dependencies && pkgInner.dependencies.find((d: Dependency) => d.name == pkg.package);
+            }).map((p: any) => new Dependency(p.package));
+            //console.log(dependencyPackages);
+            //let reverseDeps: Dependency[] = dependencyPackages.length != 0 ? dependencyPackages.map((p: any) => new Dependency(p.package)) : [];
+            dependencyPackages.sort();
+            pkg.requiredBy = dependencyPackages;
+            return pkg;
         });
-        map = map.sort((a, b) => a.name.localeCompare(b.name));
-        map = map.map((p: StatusPackage) => {
-            p.checkInstalledDependencies(map);
+
+        // Sort packages alphabetically
+        packages = packages.sort((a, b) => a.package.localeCompare(b.package));
+
+        // Check which Dependencies are installed for the user
+        packages = packages.map((p: StatusPackage) => {
+            p.checkInstalledDependencies(packages);
             return p;
         });
-        return map;
+
+        return packages;
     }
 
     private static getDescription(str: string): string[] {
@@ -96,7 +138,7 @@ export class StatusReader {
      * @param line The line being checked
      */
     private static getValue(line: string, key: string): string | undefined {
-        let regExString = new RegExp(StatusReader.escapeRegExp(key) + "(.*?)\r", "g");
+        let regExString = new RegExp(StatusReader.escapeRegExp(key) + ": (.*?)\r", "g");
         let RE = regExString.exec(line);
         return (RE) ? RE[1] : undefined;
     }

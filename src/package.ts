@@ -1,25 +1,21 @@
+import {Keys} from "./StatusReader";
+
+
+const types: Map<Keys, string> = new Map([])
+
 export class StatusPackage {
+    private _dependencies: Dependency[] = [];
+    private _requiredBy: Dependency[] = [];
 
-    status: string;
-    priority: string;
-    section: string;
-    installSize: string;
-    maintainer: string;
-    architecture: string;
-    source: string;
-    version: string;
-    replaces: string;
-    private _dependencies: Dependency[];
-    private _requiredBy: Dependency[];
-    breaks: string;
-    enhances: string;
-    description: string[];
-    descriptionHeader: string;
-    originalMaintainer: string | undefined;
-    name: string;
+    /**
+     * This is used for dynamically computed properties.
+     */
+    [index: string]: any;
 
-    constructor(name: string) {
-        this.name = name;
+    constructor(values: Record<string, string>) {
+        Object.keys(values).forEach((v: string) => {
+            this[v] = values[v];
+        });
     }
 
     get requiredBy(): Dependency[] {
@@ -38,7 +34,6 @@ export class StatusPackage {
         return this._dependencies;
     }
 
-    // Removes version numbers and whitespace
     dependenciesFromSArray = (deps: string[]) => {
         if (deps) {
 
@@ -46,7 +41,7 @@ export class StatusPackage {
              * Checks if the dependency has an alternative available
              * If yes, create two dependencies and mark the second one as alternative
              */
-            let depends: any = deps.map((d: string) => {
+            let depends: any[] = deps.map((d: string) => {
                 let splitDep: string[] = d.split("|");
                 if (splitDep.length == 2) {
                     return [new Dependency(splitDep[0], false), new Dependency(splitDep[1], true)]
@@ -55,7 +50,7 @@ export class StatusPackage {
             });
 
             //Flattens the array
-            let flattened = [].concat.apply([], depends);
+            let flattened: Dependency[] = [].concat.apply([], depends);
 
             // Removes any unnecessary data from the dependency name
             flattened = flattened ? flattened.map((d: any) => {
@@ -84,20 +79,20 @@ export class StatusPackage {
             if (isNew) set.add(key);
             return isNew;
         });
-    }
+    };
 
     /**
-     * Checks whether the depedency is installed or not
+     * Checks whether the dependency is installed or not
      * Used when creating links in the webapp
      * @param installed
      */
     checkInstalledDependencies(installed: StatusPackage[]): void {
         this._dependencies = this._dependencies ? this._dependencies.map((dep: Dependency) => {
-            dep.installed = installed.find((i: StatusPackage) => (i.name == dep.name)) !== undefined;
+            dep.installed = installed.find((i: StatusPackage) => (i.package == dep.name)) !== undefined;
             return dep;
         }) : [];
         this._requiredBy = this._requiredBy ? this._requiredBy.map((dep: Dependency) => {
-            dep.installed = installed.find((i: StatusPackage) => (i.name == dep.name)) !== undefined;
+            dep.installed = installed.find((i: StatusPackage) => (i.package == dep.name)) !== undefined;
             return dep;
         }) : [];
     }
@@ -137,6 +132,7 @@ export class Dependency {
 
     constructor(name: string, alternative?: boolean) {
         this._name = name;
-        this._alternative = alternative;
+        this._alternative = alternative ? alternative : false;
+        this._installed = false;
     }
 }
