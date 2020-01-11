@@ -3,6 +3,7 @@ import {Dependency, StatusPackage} from "./package";
 /**
  * Enumerator including the fields included in the status file
  * This is handled as an object in Javascript
+ * We can easily add new fields to scan by adding a new item to the enum
  */
 export enum Keys {
     package = "Package",
@@ -12,7 +13,8 @@ export enum Keys {
     architecture = "Architecture",
     source = "Source",
     version = "Version",
-    depends = "Depends"
+    depends = "Depends",
+    //priority = "Priority" //Uncomment these to parse also them
 }
 
 /**
@@ -65,7 +67,7 @@ export class StatusReader {
             statusPkg.descriptionHeader = values.description ? values.description : "";
             statusPkg.description = this.getDescription(pkg);
 
-            let dep = StatusReader.getValue(pkg, "Depends");
+            // Create dependencies from the array string
             statusPkg.dependenciesFromSArray(values.depends ? values.depends.split(", ") : []);
             return statusPkg;
         }).filter(v => v && v.package);
@@ -103,6 +105,7 @@ export class StatusReader {
         return str.split('\n').filter((r: string) => r.startsWith(' ') && !r.startsWith(' /etc'));
     }
 
+    //TODO: Fix and use this in processFIle
     /**
      * Returns an array of strings according to
      * @param str

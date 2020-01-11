@@ -24,7 +24,12 @@ export class ReaktorServer {
         );
         this.app = http.createServer((req: IncomingMessage, res: ServerResponse) => {
             res.writeHead(200, {'Content-Type': 'text/html'});
-            console.log(`Request received from: ${req.url}`);
+            let ip = req.headers['x-forwarded-for'] ||
+                req.connection.remoteAddress ||
+                req.socket.remoteAddress ||
+                (req.socket ? req.socket.remoteAddress : null);
+            console.log(`Request received to: ${req.url}`);
+            console.log(`Requested by: ${ip}`);
             if (req.url == "/css/style.css") {
                 res.write(fs.readFileSync(__dirname + req.url, 'utf8'));
             }
